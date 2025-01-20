@@ -5,6 +5,6 @@ sentence-transformers
 langchain>=0.1.0
 langchain-community>=0.0.10
 langchain-core>=0.1.0
+langchain-huggingface
 torch
 transformers
-python-logging
