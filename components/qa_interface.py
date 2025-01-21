@@ -5,16 +5,16 @@ from components.pdf_viewer import PDFViewer
 
 class QAInterface:
     def render_question_input(self) -> str:
-        st.markdown("### 🤔 Ask a question about your documents")
-        return st.text_input("", placeholder="Enter your question here...")
+        st.markdown("### 🤔 Trouver dans CES documents")
+        return st.text_input("", placeholder="Une question...")
 
     def render_answers(self, answers: List[Dict]):
         if not answers:
-            st.warning("No relevant answers found.")
+            st.warning("Pas de résultat trouvé")
             return
 
         answer = answers[0]
-        st.markdown("### ✎ Answer")
+        st.markdown("### ✎ Réponse")
         st.markdown(answer["content"])
         
         if answer["sources"]:

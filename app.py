@@ -8,20 +8,25 @@ from services.pdf_processor import PDFProcessor
 from typing import List, Dict
 
 def main():
-    st.set_page_config(page_title="PDF Q&A System", layout="wide")
+    st.set_page_config(page_title="Recherche dans les PDFs", layout="wide")
 
     # Initialize session state
     if 'processed_pdfs' not in st.session_state:
         st.session_state.processed_pdfs = set()
+        
+    # Réinitialiser le vector store s'il est None
+    if 'vector_store' not in st.session_state or st.session_state.vector_store is None:
         st.session_state.vector_store = VectorStore()
+        
+    if 'pdf_processor' not in st.session_state:
         st.session_state.pdf_processor = PDFProcessor()
         
-        # Charger les PDFs existants au démarrage
-        documents = st.session_state.pdf_processor.process_file()
-        if documents:
-            st.session_state.vector_store.add_documents(documents)
-            for doc in documents:
-                st.session_state.processed_pdfs.add(doc.metadata["source"])
+    # Charger les PDFs existants au démarrage
+    documents = st.session_state.pdf_processor.process_file()
+    if documents:
+        st.session_state.vector_store.add_documents(documents)
+        for doc in documents:
+            st.session_state.processed_pdfs.add(doc.metadata["source"])
 
     if 'current_pdf' not in st.session_state:
         st.session_state.current_pdf = None
@@ -35,29 +40,29 @@ def main():
     main_col, qa_col = st.columns([2, 1])
 
     with main_col:
-        st.title("📚 PDF Question-Answering System")
+        st.title("📚 Recherche dans un ensemble de PDFs")
         
-        # File upload section
+        # Section upload
         uploaded_files = st.file_uploader(
-            "Upload your PDF documents",
+            "Déposez vos documents PDF",
             type=['pdf'],
             accept_multiple_files=True
         )
 
-        # Process only new uploaded files
+        # Messages de traitement
         if uploaded_files:
             for file in uploaded_files:
                 if file.name not in st.session_state.processed_pdfs:
-                    with st.spinner(f'Processing {file.name}...'):
+                    with st.spinner(f'Traitement de {file.name}...'):
                         try:
                             documents = st.session_state.pdf_processor.process_file(file)
                             st.session_state.vector_store.add_documents(documents)
                             st.session_state.processed_pdfs.add(file.name)
-                            st.success(f"Successfully processed {file.name}")
+                            st.success(f"{file.name} traité avec succès")
                         except Exception as e:
-                            st.error(f"Error processing {file.name}: {str(e)}")
+                            st.error(f"Erreur lors du traitement de {file.name}: {str(e)}")
 
-        # Display selected PDF
+        # Affichage du PDF sélectionné
         if st.session_state.current_pdf:
             page = getattr(st.session_state, 'current_page', 1)
             highlight = getattr(st.session_state, 'highlight_text', None)
@@ -67,7 +72,7 @@ def main():
                 highlight_text=highlight
             )
         else:
-            st.info("Select a PDF from the sidebar to view it here.")
+            st.info("Sélectionnez un PDF dans la barre latérale pour le visualiser.")
 
     with qa_col:
         # Question and Answer interface
